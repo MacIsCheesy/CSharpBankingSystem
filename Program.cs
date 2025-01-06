@@ -58,21 +58,31 @@ class Program {
                     case "2":
                         Console.Write("Input amount to deposit: ");
                         double depositAmount = double.Parse(Console.ReadLine());
-                        user.Balance += depositAmount;
-                        user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nDeposited {depositAmount}\n");
-                        Console.WriteLine($"Successfully deposited {depositAmount} from account. New balance is {user.Balance}");
-                        break;
+                        if (depositAmount >= 0) {
+                            user.Balance += depositAmount;
+                            user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nDeposited {depositAmount}\n");
+                            Console.WriteLine($"Successfully deposited {depositAmount} from account. New balance is {user.Balance}");
+                        }
+                        else {
+                            Console.WriteLine($"Can't deposit negative amount, please select 3. Withdraw instead");
+                        }
+                            break;
                     case "3":
                         Console.Write("Input amount to withdraw: ");
                         double withdrawAmount = double.Parse(Console.ReadLine());
-                        if (withdrawAmount > user.Balance) {
-                            Console.WriteLine("Insufficient balance.");
+                        if (withdrawAmount >= 0) {
+                            if (withdrawAmount > user.Balance) {
+                                Console.WriteLine("Insufficient balance.");
+                            }
+                            else {
+                                user.Balance -= withdrawAmount;
+                                user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nWithdrew {withdrawAmount}\n");
+                                Console.WriteLine($"Successfully withdrew {withdrawAmount}. New balance is {user.Balance}");
+                            }
                         }
                         else {
-                            user.Balance -= withdrawAmount;
-                            user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nWithdrew {withdrawAmount}\n");
-                            Console.WriteLine($"Successfully withdrew {withdrawAmount}. New balance is {user.Balance}");
-                        }
+                            Console.WriteLine("Can't withdraw negative amount, please select 2. Deposit instead");
+                            }
                         break;
                     case "4":
                         TransferFunds(user);
@@ -97,7 +107,7 @@ class Program {
         }
     }
     static void TransferFunds(User sender) {
-
+        
         Console.Write("Enter the recipient's username: ");
         string recipientUsername = Console.ReadLine();
         DateTime now = DateTime.Now;
@@ -108,21 +118,26 @@ class Program {
         }
         Console.Write("Enter the amount to transfer: ");
         double transferAmount = double.Parse(Console.ReadLine());
-        
-        if (transferAmount > sender.Balance) {
-            Console.WriteLine("Insufficient balance.");
-            return;
-        }
-        string json = File.ReadAllText(GetDesktop($"{recipientUsername}.json"));
-        User recipient = JsonSerializer.Deserialize<User>(json);
-        sender.Balance -= transferAmount;
-        recipient.Balance += transferAmount;
 
-        sender.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Sent {transferAmount} to {recipientUsername}\n");
-        recipient.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Received {transferAmount} from {sender.Username}\n");
-        File.WriteAllText(GetDesktop($"{sender.Username}.json"), JsonSerializer.Serialize(sender));
-        File.WriteAllText(GetDesktop($"{recipientUsername}.json"), JsonSerializer.Serialize(recipient));
-        Console.WriteLine($"Transferred {transferAmount} to {recipient.Username}. New balance is {sender.Balance}");
+        if (transferAmount >= 0) {
+            if (transferAmount > sender.Balance) {
+                Console.WriteLine("Insufficient balance.");
+                return;
+            }
+            string json = File.ReadAllText(GetDesktop($"{recipientUsername}.json"));
+            User recipient = JsonSerializer.Deserialize<User>(json);
+            sender.Balance -= transferAmount;
+            recipient.Balance += transferAmount;
+
+            sender.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Sent {transferAmount} to {recipientUsername}\n");
+            recipient.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Received {transferAmount} from {sender.Username}\n");
+            File.WriteAllText(GetDesktop($"{sender.Username}.json"), JsonSerializer.Serialize(sender));
+            File.WriteAllText(GetDesktop($"{recipientUsername}.json"), JsonSerializer.Serialize(recipient));
+            Console.WriteLine($"Transferred {transferAmount} to {recipient.Username}. New balance is {sender.Balance}");
+        }
+        else {
+            Console.WriteLine("Unable to input a negative number");
+        }
     }
     static void ViewTransactionHistory(User user) {
         Console.WriteLine("\nTransaction History:");
