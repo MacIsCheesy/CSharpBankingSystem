@@ -58,7 +58,7 @@ class Program {
                     case "2":
                         Console.Write("Input amount to deposit: ");
                         double depositAmount = double.Parse(Console.ReadLine());
-                        if (depositAmount <= 0) {
+                        if (depositAmount >= 0) {
                             user.Balance += depositAmount;
                             user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nDeposited {depositAmount}\n");
                             Console.WriteLine($"Successfully deposited {depositAmount} from account. New balance is {user.Balance}");
@@ -70,7 +70,7 @@ class Program {
                     case "3":
                         Console.Write("Input amount to withdraw: ");
                         double withdrawAmount = double.Parse(Console.ReadLine());
-                        if (withdrawAmount <= 0) {
+                        if (withdrawAmount >= 0) {
                             if (withdrawAmount > user.Balance) {
                                 Console.WriteLine("Insufficient balance.");
                             }
@@ -119,7 +119,7 @@ class Program {
         Console.Write("Enter the amount to transfer: ");
         double transferAmount = double.Parse(Console.ReadLine());
 
-        if (transferAmount <= 0) {
+        if (transferAmount >= 0) {
             if (transferAmount > sender.Balance) {
                 Console.WriteLine("Insufficient balance.");
                 return;
