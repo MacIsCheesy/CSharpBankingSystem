@@ -2,14 +2,16 @@
 using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 public class User {
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public double Balance { get; set; } = 0.0;
+    public string Username {get; set;}
+    public string Password {get; set;}
+    public double Balance {get; set;} = 0.0;
     public List<string> TransactionHistory { get; set; } = new List<string>();
 }
 class Program {
+
     static string GetDesktop(string filename) {
         string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         return Path.Combine(desktopPath, filename);
@@ -26,8 +28,11 @@ class Program {
         Console.WriteLine("Account created successfully!");
     }
     static void Login() {
+
         Console.Write("Enter your username: ");
         string username = Console.ReadLine();
+        DateTime now = DateTime.Now;
+
 
         if (!File.Exists(GetDesktop($"{username}.json"))) {
             Console.WriteLine("User not found. Please create an account first.");
@@ -43,7 +48,7 @@ class Program {
             Console.WriteLine($"Welcome, {username}!");
             while (true) {
                 Console.WriteLine("\n1. Check Balance\n2. Deposit\n3. Withdraw\n4. Transfer Funds\n5. View Transaction History\n6. Logout");
-                Console.Write("Enter your choice: ");
+                Console.Write("Input: ");
                 string choice = Console.ReadLine();
 
                 switch (choice) {
@@ -51,21 +56,21 @@ class Program {
                         Console.WriteLine($"Your balance is: {user.Balance}");
                         break;
                     case "2":
-                        Console.Write("Enter the amount to deposit: ");
+                        Console.Write("Input amount to deposit: ");
                         double depositAmount = double.Parse(Console.ReadLine());
                         user.Balance += depositAmount;
-                        user.TransactionHistory.Add($"Deposited {depositAmount}");
-                        Console.WriteLine($"Successfully deposited {depositAmount}. New balance is {user.Balance}");
+                        user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nDeposited {depositAmount}\n");
+                        Console.WriteLine($"Successfully deposited {depositAmount} from account. New balance is {user.Balance}");
                         break;
                     case "3":
-                        Console.Write("Enter the amount to withdraw: ");
+                        Console.Write("Input amount to withdraw: ");
                         double withdrawAmount = double.Parse(Console.ReadLine());
                         if (withdrawAmount > user.Balance) {
                             Console.WriteLine("Insufficient balance.");
                         }
                         else {
                             user.Balance -= withdrawAmount;
-                            user.TransactionHistory.Add($"Withdrew {withdrawAmount}");
+                            user.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")}\nWithdrew {withdrawAmount}\n");
                             Console.WriteLine($"Successfully withdrew {withdrawAmount}. New balance is {user.Balance}");
                         }
                         break;
@@ -91,10 +96,11 @@ class Program {
             Console.WriteLine("Incorrect password. Please try again.");
         }
     }
-
     static void TransferFunds(User sender) {
+
         Console.Write("Enter the recipient's username: ");
         string recipientUsername = Console.ReadLine();
+        DateTime now = DateTime.Now;
 
         if (!File.Exists(GetDesktop($"{recipientUsername}.json"))) {
             Console.WriteLine("Recipient account not found.");
@@ -112,11 +118,11 @@ class Program {
         sender.Balance -= transferAmount;
         recipient.Balance += transferAmount;
 
-        sender.TransactionHistory.Add($"Sent {transferAmount} to {recipientUsername}");
-        recipient.TransactionHistory.Add($"Received {transferAmount} from {sender.Username}");
+        sender.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Sent {transferAmount} to {recipientUsername}\n");
+        recipient.TransactionHistory.Add($"\nOn {now.ToString("dd-MM-yyyy HH:mm")} Received {transferAmount} from {sender.Username}\n");
         File.WriteAllText(GetDesktop($"{sender.Username}.json"), JsonSerializer.Serialize(sender));
         File.WriteAllText(GetDesktop($"{recipientUsername}.json"), JsonSerializer.Serialize(recipient));
-        Console.WriteLine($"Successfully transferred {transferAmount} to {recipient.Username}. New balance is {sender.Balance}");
+        Console.WriteLine($"Transferred {transferAmount} to {recipient.Username}. New balance is {sender.Balance}");
     }
     static void ViewTransactionHistory(User user) {
         Console.WriteLine("\nTransaction History:");
